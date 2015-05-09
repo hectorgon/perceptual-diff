@@ -3,3 +3,8 @@
 *.sdf
 *.suo
 *.opensdf
+Dist/
+Win32/
+x64/
+Release/
+Debug/
