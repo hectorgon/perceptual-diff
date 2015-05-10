@@ -169,17 +169,20 @@ bool Yee_Compare(CompareArgs &args)
 		for (x = 0; x < w; x++) {
 			float r, g, b, l;
 			i = x + y * w;
-			r = powf(args.ImgA->Get_Red(i) / 255.0f, args.Gamma);
+
+			r = powf(args.ImgA->Get_Red(i)   / 255.0f, args.Gamma);
 			g = powf(args.ImgA->Get_Green(i) / 255.0f, args.Gamma);
-			b = powf(args.ImgA->Get_Blue(i) / 255.0f, args.Gamma);						
+			b = powf(args.ImgA->Get_Blue(i)  / 255.0f, args.Gamma);						
 			AdobeRGBToXYZ(r,g,b,aX[i],aY[i],aZ[i]);			
 			XYZToLAB(aX[i], aY[i], aZ[i], l, aA[i], aB[i]);
-			r = powf(args.ImgB->Get_Red(i) / 255.0f, args.Gamma);
+			
+         r = powf(args.ImgB->Get_Red(i)   / 255.0f, args.Gamma);
 			g = powf(args.ImgB->Get_Green(i) / 255.0f, args.Gamma);
-			b = powf(args.ImgB->Get_Blue(i) / 255.0f, args.Gamma);						
+			b = powf(args.ImgB->Get_Blue(i)  / 255.0f, args.Gamma);						
 			AdobeRGBToXYZ(r,g,b,bX[i],bY[i],bZ[i]);
 			XYZToLAB(bX[i], bY[i], bZ[i], l, bA[i], bB[i]);
-			aLum[i] = aY[i] * args.Luminance;
+			
+         aLum[i] = aY[i] * args.Luminance;
 			bLum[i] = bY[i] * args.Luminance;
 		}
 	}

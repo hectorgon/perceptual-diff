@@ -18,6 +18,106 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 #define _RGBAIMAGE_H
 
 #include <string>
+#include <cstdint> // for int32_t, uint32_t, etc.
+
+/** Basic pixel values types.
+ */
+typedef uint8_t RGBAFloatComp;
+typedef uint8_t RGBAInt32Comp;
+inline RGBAInt32Comp ConvertRGBAFloatCompToInt32(RGBAFloatComp f) {
+   return f;
+}
+inline RGBAFloatComp ConvertRGBAInt32CompToFloat(RGBAInt32Comp i) {
+   return i;
+}
+
+typedef uint32_t RGBAInt32;
+
+/** Class encapsulating a float R,G,B,A pixel.
+ *
+ * Internal representation assumes data is in the ABGR format, with the RGB
+ * color channels premultiplied by the alpha value.  Premultiplied alpha is
+ * often also called "associated alpha" - see the tiff 6 specification for some
+ * discussion - http://partners.adobe.com/asn/developer/PDFS/TN/TIFF6.pdf
+ *
+ */
+class RGBAFloat
+{
+public:
+   RGBAFloat() {};
+   RGBAFloat(const RGBAFloatComp &v) :
+      mR(v), mG(v), mB(v), mA(v) {}
+   RGBAFloat(
+         const RGBAFloatComp &r, 
+         const RGBAFloatComp &g, 
+         const RGBAFloatComp &b, 
+         const RGBAFloatComp &a) :
+      mR(r), mG(g), mB(b), mA(a) {}
+
+   const RGBAFloatComp& GetComp(unsigned int i) const {
+      return reinterpret_cast<const RGBAFloatComp*>(this)[i];
+   }
+   RGBAFloatComp& GetComp(unsigned int i) {
+      return reinterpret_cast<RGBAFloatComp*>(this)[i];
+   }
+   //RGBAInt32Comp GetCompInt(unsigned int i) {
+   //   return ConvertRGBAFloatCompToInt32(GetComp(i));
+   //}
+   //RGBAInt32Comp GetCompFloat(unsigned int i) {
+   //   return ConvertRGBAFloatCompToInt32(GetComp(i));
+   //}
+   RGBAInt32 GetInt32() {
+      return
+             ConvertRGBAFloatCompToInt32(mR) & 0xFF
+         || (ConvertRGBAFloatCompToInt32(mG) & 0xFF) << 8
+         || (ConvertRGBAFloatCompToInt32(mB) & 0xFF) << 16
+         || (ConvertRGBAFloatCompToInt32(mA) & 0xFF) << 24;
+   }
+
+   void Set(
+         const RGBAFloatComp &r, 
+         const RGBAFloatComp &g, 
+         const RGBAFloatComp &b, 
+         const RGBAFloatComp &a) {
+      mR = r;
+      mG = g;
+      mB = b;
+      mA = a;
+   }
+   //void Set(
+   //      const RGBAInt32Comp &r, 
+   //      const RGBAInt32Comp &g, 
+   //      const RGBAInt32Comp &b, 
+   //      const RGBAInt32Comp &a) {
+   //   mR = ConvertRGBAInt32CompToFloat(r);
+   //   mG = ConvertRGBAInt32CompToFloat(g);
+   //   mB = ConvertRGBAInt32CompToFloat(b);
+   //   mA = ConvertRGBAInt32CompToFloat(a);
+   //}
+   void Set(RGBAInt32 rgba) {
+      mR = ConvertRGBAInt32CompToFloat(rgba         & 0xFF);
+      mG = ConvertRGBAInt32CompToFloat((rgba >> 8)  & 0xFF);
+      mB = ConvertRGBAInt32CompToFloat((rgba >> 16) & 0xFF);
+      mA = ConvertRGBAInt32CompToFloat((rgba >> 24) & 0xFF);
+   }
+
+   RGBAFloat& operator+=(const RGBAFloat& a) {
+      mR += a.mR;
+      mG += a.mG;
+      mR += a.mR;
+      mA += a.mA;
+      return *this;
+   }
+
+   bool operator==(const RGBAFloat& a) {
+      return mR == a.mR && mG == a.mG && mR == a.mR && mA == a.mA;
+   }
+   bool operator!=(const RGBAFloat& a) {
+      return !operator==(a);
+   }
+
+   RGBAFloatComp mR, mG, mB, mA;
+};
 
 /** Class encapsulating an image containing R,G,B,A channels.
  *
@@ -27,41 +127,86 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * discussion - http://partners.adobe.com/asn/developer/PDFS/TN/TIFF6.pdf
  *
  */
-class RGBAImage
+class RGBAFloatImage
 {
-	RGBAImage(const RGBAImage&);
-	RGBAImage& operator=(const RGBAImage&);
+   RGBAFloatImage(const RGBAFloatImage&);
+   RGBAFloatImage& operator=(const RGBAFloatImage&);
+
 public:
-	RGBAImage(int w, int h, const char *name = 0)
-	{
-		Width = w;
-		Height = h;
-		if (name) Name = name;
-		Data = new unsigned int[w * h];
-	};
-	~RGBAImage() { if (Data) delete[] Data; }
-	unsigned char Get_Red(unsigned int i) { return (Data[i] & 0xFF); }
-	unsigned char Get_Green(unsigned int i) { return ((Data[i]>>8) & 0xFF); }
-	unsigned char Get_Blue(unsigned int i) { return ((Data[i]>>16) & 0xFF); }
-	unsigned char Get_Alpha(unsigned int i) { return ((Data[i]>>24) & 0xFF); }
-	void Set(unsigned char r, unsigned char g, unsigned char b, unsigned char a, unsigned int i)
-	{ Data[i] = r | (g << 8) | (b << 16) | (a << 24); }
-	int Get_Width(void) const { return Width; }
-	int Get_Height(void) const { return Height; }
-	void Set(int x, int y, unsigned int d) { Data[x + y * Width] = d; }
-	unsigned int Get(int x, int y) const { return Data[x + y * Width]; }
-	unsigned int Get(int i) const { return Data[i]; }
-	const std::string &Get_Name(void) const { return Name; }
-   RGBAImage* DownSample() const;
-	
-	bool WriteToFile(const char* filename);
-	static RGBAImage* ReadFromFile(const char* filename);
-	
+   RGBAFloatImage(int w, int h, const char *name = 0) {
+      Width = w;
+      Height = h;
+      if (name) Name = name;
+      Data = new RGBAFloat[w * h];
+   };
+   ~RGBAFloatImage() { if (Data) delete[] Data; }
+
+   RGBAFloatComp Get_Red(unsigned int i)   {
+      return Data[i].mR;
+   }
+   RGBAFloatComp Get_Green(unsigned int i) {
+      return Data[i].mG;
+   }
+   RGBAFloatComp Get_Blue(unsigned int i)  {
+      return Data[i].mB;
+   }
+   RGBAFloatComp Get_Alpha(unsigned int i) {
+      return Data[i].mA;
+   }
+
+   void Set(
+         const RGBAFloatComp &r,
+         const RGBAFloatComp &g,
+         const RGBAFloatComp &b,
+         const RGBAFloatComp &a,
+         unsigned int i) {
+      Data[i].Set(r, g, b, a); 
+   }
+   void Set(RGBAFloat d, int x, int y) {
+      Data[x + y * Width] = d;
+   }
+   //void Set(
+   //      const RGBAInt32Comp &r,
+   //      const RGBAInt32Comp &g,
+   //      const RGBAInt32Comp &b,
+   //      const RGBAInt32Comp &a,
+   //      unsigned int i) {
+   //   Data[i].Set(r, g, b, a); 
+   //}
+   void Set(RGBAInt32 rgba, int i) {
+      Data[i].Set(rgba);
+   }
+
+   RGBAFloat Get(int x, int y) const {
+      return Data[x + y * Width];
+   }
+   RGBAFloat Get(int i) const {
+      return Data[i];
+   }
+   uint32_t GetInt32(int i) {
+      return Data[i].GetInt32();
+   }
+
+   int Get_Width(void) const {
+      return Width;
+   }
+   int Get_Height(void) const {
+      return Height;
+   }
+
+   const std::string &Get_Name(void) const {
+      return Name;
+   }
+   RGBAFloatImage* DownSample() const;
+   
+   bool WriteToFile(const char* filename);
+   static RGBAFloatImage* ReadFromFile(const char* filename);
+
 protected:
-	int Width;
-	int Height;
-	std::string Name;
-	unsigned int *Data;
+   int Width;
+   int Height;
+   std::string Name;
+   RGBAFloat *Data;
 };
 
 #endif

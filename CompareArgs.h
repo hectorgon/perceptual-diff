@@ -19,7 +19,7 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 
 #include <string>
 
-class RGBAImage;
+class RGBAFloatImage;
 
 // Args to pass into the comparison function
 class CompareArgs
@@ -30,9 +30,9 @@ public:
 	bool Parse_Args(int argc, char **argv);	
 	void Print_Args();
 	
-	RGBAImage		*ImgA;				// Image A
-	RGBAImage		*ImgB;				// Image B
-	RGBAImage		*ImgDiff;			// Diff image
+	RGBAFloatImage		*ImgA;				// Image A
+	RGBAFloatImage		*ImgB;				// Image B
+	RGBAFloatImage		*ImgDiff;			// Diff image
 	bool			Verbose;			// Print lots of text or not
 	bool			LuminanceOnly;		// Only consider luminance; ignore chroma channels in the comparison.
 	float			FieldOfView;		// Field of view in degrees

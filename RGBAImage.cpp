@@ -20,37 +20,43 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 #include "FreeImage.h"
 #include <cstdio>
 #include <cstring>
+#include <cstdint> // for int32_t, uint32_t, etc.
 
-RGBAImage* RGBAImage::DownSample() const {
-   if (Width <=1 || Height <=1) return NULL;
+RGBAFloatImage* RGBAFloatImage::DownSample() const {
+   if (Width <=1 || Height <=1)
+      return NULL;
+
    int nw = Width / 2;
    int nh = Height / 2;
-   RGBAImage* img = new RGBAImage(nw, nh, Name.c_str());
+   RGBAFloatImage* img = new RGBAFloatImage(nw, nh, Name.c_str());
+
    for (int y = 0; y < nh; y++) {
       for (int x = 0; x < nw; x++) {
-         int d[4];
+         RGBAFloat d[4];
          // Sample a 2x2 patch from the parent image.
          d[0] = Get(2 * x + 0, 2 * y + 0);
          d[1] = Get(2 * x + 1, 2 * y + 0);
          d[2] = Get(2 * x + 0, 2 * y + 1);
          d[3] = Get(2 * x + 1, 2 * y + 1);
-         int rgba = 0;
-         // Find the average color.
+         RGBAFloat avgColor(0);
+         // Compute average color.
          for (int i = 0; i < 4; i++) {
-            int c = (d[0] >> (8 * i)) & 0xFF;
-            c += (d[1] >> (8 * i)) & 0xFF;
-            c += (d[2] >> (8 * i)) & 0xFF;
-            c += (d[3] >> (8 * i)) & 0xFF;
+            RGBAFloatComp c;
+            c  = d[0].GetComp(i);
+            c += d[1].GetComp(i);
+            c += d[2].GetComp(i);
+            c += d[3].GetComp(i);
             c /= 4;
-            rgba |= (c & 0xFF) << (8 * i);
+            avgColor.GetComp(i) = c;
          }
-         img->Set(x, y, rgba);
+         img->Set(avgColor, x, y);
       }
    }
+
    return img;
 }
 
-bool RGBAImage::WriteToFile(const char* filename)
+bool RGBAFloatImage::WriteToFile(const char* filename)
 {
 	const FREE_IMAGE_FORMAT fileType = FreeImage_GetFIFFromFilename(filename);
 	if(FIF_UNKNOWN == fileType)
@@ -66,12 +72,22 @@ bool RGBAImage::WriteToFile(const char* filename)
 		return false;
 	}
 
-	const unsigned int* source = Data;
-	for( int y=0; y < Height; y++, source += Width )
-	{
-		unsigned int* scanline = (unsigned int*)FreeImage_GetScanLine(bitmap, Height - y - 1 );
-		memcpy(scanline, source, sizeof(source[0]) * Width);
-	}	
+	const RGBAFloat* source = Data;
+   //if (32bit uint image)
+   //{
+      int idx = 0;
+	   for( int y=0; y < Height; y++, source += Width )
+	   {
+         RGBAInt32* scanline = (RGBAInt32*)FreeImage_GetScanLine(bitmap, Height - y - 1);
+		   //memcpy(scanline, source, sizeof(source[0]) * Width);
+         for (int x = 0; x < Width; x++, idx++)
+            scanline[x] = GetInt32(idx);
+      }
+   //}
+   // else if (float image)
+   //{
+   //  float save...
+   //}
 	
 	FreeImage_SetTransparent(bitmap, false);
 	FIBITMAP* converted = FreeImage_ConvertTo24Bits(bitmap);
@@ -86,7 +102,7 @@ bool RGBAImage::WriteToFile(const char* filename)
 	return result;
 }
 
-RGBAImage* RGBAImage::ReadFromFile(const char* filename)
+RGBAFloatImage* RGBAFloatImage::ReadFromFile(const char* filename)
 {
 	const FREE_IMAGE_FORMAT fileType = FreeImage_GetFileType(filename);
 	if(FIF_UNKNOWN == fileType)
@@ -110,14 +126,22 @@ RGBAImage* RGBAImage::ReadFromFile(const char* filename)
 	const int w = FreeImage_GetWidth(freeImage);
 	const int h = FreeImage_GetHeight(freeImage);
 
-	RGBAImage* result = new RGBAImage(w, h, filename);
+	RGBAFloatImage* result = new RGBAFloatImage(w, h, filename);
 	// Copy the image over to our internal format, FreeImage has the scanlines bottom to top though.
-	unsigned int* dest = result->Data;
-	for( int y=0; y < h; y++, dest += w )
-	{
-		const unsigned int* scanline = (const unsigned int*)FreeImage_GetScanLine(freeImage, h - y - 1 );
-		memcpy(dest, scanline, sizeof(dest[0]) * w);
-	}	
+   //if (32bit uint image)
+   //{
+      int resIdx = 0;
+	   for( int y=0; y < h; y++ )
+	   {
+         const RGBAInt32* scanline = (const RGBAInt32*)FreeImage_GetScanLine(freeImage, h - y - 1);
+         for (int x = 0; x < w; x++, resIdx++)
+            result->Set(scanline[x], resIdx);
+      }
+   //}
+   // else if (float image)
+   //{
+   //  float load...
+   //}
 
 	FreeImage_Unload(freeImage);
 	return result;

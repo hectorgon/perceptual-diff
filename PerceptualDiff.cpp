@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 	} else {
 		if (args.Verbose) args.Print_Args();
 	}
-	
+
 	const bool passed = Yee_Compare(args);
 	if (passed) {
 		if(args.Verbose)

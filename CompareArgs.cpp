@@ -110,7 +110,7 @@ bool CompareArgs::Parse_Args(int argc, char **argv)
 				output_file_name = argv[i];
 			}
 		} else if (image_count < 2) {
-			RGBAImage* img = RGBAImage::ReadFromFile(argv[i]);
+			RGBAFloatImage* img = RGBAFloatImage::ReadFromFile(argv[i]);
 			if (!img) {
 				ErrorStr = "FAIL: Cannot open ";
 				ErrorStr += argv[i];
@@ -133,7 +133,7 @@ bool CompareArgs::Parse_Args(int argc, char **argv)
 	}
    for (int i = 0; i < DownSample; i++) {
       if (Verbose) printf("Downsampling by %d\n", 1 << (i+1));
-      RGBAImage *tmp = ImgA->DownSample();
+      RGBAFloatImage *tmp = ImgA->DownSample();
       if (tmp) {
          delete ImgA;
          ImgA = tmp;
@@ -145,7 +145,7 @@ bool CompareArgs::Parse_Args(int argc, char **argv)
       }
    }
 	if(output_file_name) {
-		ImgDiff = new RGBAImage(ImgA->Get_Width(), ImgA->Get_Height(), output_file_name);
+		ImgDiff = new RGBAFloatImage(ImgA->Get_Width(), ImgA->Get_Height(), output_file_name);
 	}
 	return true;
 }
@@ -156,4 +156,6 @@ void CompareArgs::Print_Args()
 	printf("Threshold pixels is %d pixels\n", ThresholdPixels);
 	printf("The Gamma is %f\n", Gamma);
 	printf("The Display's luminance is %f candela per meter squared\n", Luminance);
+   printf("Image 1 is \"%s\"\n", ImgA->Get_Name().c_str());
+   printf("Image 2 is \"%s\"\n", ImgB->Get_Name().c_str());
 }
