@@ -32,24 +32,24 @@ inline T Clamp(const T& n, const T& lower, const T& upper)
 }
 
 /** Basic pixel values types. */
+
 typedef float   RGBAFloatComp;
 typedef uint8_t RGBAInt32Comp;
 
 inline RGBAInt32Comp ConvertRGBAFloatCompToInt32(RGBAFloatComp f) {
    return std::lround(Clamp(f, 0.0f, 1.0f) * 255.0f);
 }
-
 inline RGBAFloatComp ConvertRGBAInt32CompToFloat(RGBAInt32Comp i) {
    return i / 255.0f;
 }
 
-/** Type for an integer R,G,B,A pixel.
+/** Type for an integer-based R,G,B,A pixel.
  *
  * The order of components is defined in the FreeImage library through macros like FI_RGBA_*_SHIFT.
  */
 typedef uint32_t RGBAInt32;
 
-/** Class encapsulating a float R,G,B,A pixel.
+/** Class encapsulating a float-based R,G,B,A pixel.
  *
  * Internal representation assumes data is in the ABGR format, with the RGB
  * color channels premultiplied by the alpha value.  Premultiplied alpha is
@@ -69,31 +69,6 @@ public:
          RGBAFloatComp b, 
          RGBAFloatComp a) :
       mR(r), mG(g), mB(b), mA(a) {}
-
-   const RGBAFloatComp& GetComp(unsigned int i) const {
-      return reinterpret_cast<const RGBAFloatComp*>(this)[i];
-   }
-   RGBAFloatComp& GetComp(unsigned int i) {
-      return reinterpret_cast<RGBAFloatComp*>(this)[i];
-   }
-   RGBAInt32 GetInt32() {
-      return
-           (ConvertRGBAFloatCompToInt32(mR) & 0xFF) << FI_RGBA_RED_SHIFT
-         | (ConvertRGBAFloatCompToInt32(mG) & 0xFF) << FI_RGBA_GREEN_SHIFT
-         | (ConvertRGBAFloatCompToInt32(mB) & 0xFF) << FI_RGBA_BLUE_SHIFT
-         | (ConvertRGBAFloatCompToInt32(mA) & 0xFF) << FI_RGBA_ALPHA_SHIFT;
-   }
-   void GetRGBTriplet(RGBAFloatComp(&rgb)[3]) {
-      rgb[0] = mR;
-      rgb[1] = mG;
-      rgb[2] = mB;
-   }
-   void GetRGBQuad(RGBAFloatComp(&rgb)[4]) {
-      rgb[0] = mR;
-      rgb[1] = mG;
-      rgb[2] = mB;
-      rgb[3] = mA;
-   }
 
    void Set(const RGBAFloatComp (&rgb)[3]) {
       mR = rgb[0];
@@ -142,6 +117,32 @@ public:
       return *this;
    }
 
+   const RGBAFloatComp& GetComp(unsigned int i) const {
+      return reinterpret_cast<const RGBAFloatComp*>(this)[i];
+   }
+   RGBAFloatComp& GetComp(unsigned int i) {
+      return reinterpret_cast<RGBAFloatComp*>(this)[i];
+   }
+
+   RGBAInt32 GetInt32() {
+      return
+           (ConvertRGBAFloatCompToInt32(mR) & 0xFF) << FI_RGBA_RED_SHIFT
+         | (ConvertRGBAFloatCompToInt32(mG) & 0xFF) << FI_RGBA_GREEN_SHIFT
+         | (ConvertRGBAFloatCompToInt32(mB) & 0xFF) << FI_RGBA_BLUE_SHIFT
+         | (ConvertRGBAFloatCompToInt32(mA) & 0xFF) << FI_RGBA_ALPHA_SHIFT;
+   }
+   void GetRGBTriplet(RGBAFloatComp(&rgb)[3]) {
+      rgb[0] = mR;
+      rgb[1] = mG;
+      rgb[2] = mB;
+   }
+   void GetRGBQuad(RGBAFloatComp(&rgb)[4]) {
+      rgb[0] = mR;
+      rgb[1] = mG;
+      rgb[2] = mB;
+      rgb[3] = mA;
+   }
+
    bool operator==(const RGBAFloat& a) {
       return mR == a.mR && mG == a.mG && mR == a.mR && mA == a.mA;
    }
@@ -152,7 +153,7 @@ public:
    RGBAFloatComp mR, mG, mB, mA;
 };
 
-/** Class encapsulating an image containing R,G,B,A channels.
+/** Class encapsulating an image containing float-based R,G,B,A channels.
  *
  * Internal representation assumes data is in the ABGR format, with the RGB
  * color channels premultiplied by the alpha value.  Premultiplied alpha is
