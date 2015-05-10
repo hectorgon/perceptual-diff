@@ -64,9 +64,9 @@ public:
    RGBAFloat(RGBAFloatComp v) :
       mR(v), mG(v), mB(v), mA(v) {}
    RGBAFloat(
-         RGBAFloatComp r, 
-         RGBAFloatComp g, 
-         RGBAFloatComp b, 
+         RGBAFloatComp r,
+         RGBAFloatComp g,
+         RGBAFloatComp b,
          RGBAFloatComp a) :
       mR(r), mG(g), mB(b), mA(a) {}
 
@@ -83,9 +83,9 @@ public:
       mA = rgba[3];
    }
    void Set(
-         RGBAFloatComp r, 
-         RGBAFloatComp g, 
-         RGBAFloatComp b, 
+         RGBAFloatComp r,
+         RGBAFloatComp g,
+         RGBAFloatComp b,
          RGBAFloatComp a) {
       mR = r;
       mG = g;
@@ -93,9 +93,9 @@ public:
       mA = a;
    }
    void Set(
-         RGBAInt32Comp r, 
-         RGBAInt32Comp g, 
-         RGBAInt32Comp b, 
+         RGBAInt32Comp r,
+         RGBAInt32Comp g,
+         RGBAInt32Comp b,
          RGBAInt32Comp a) {
       mR = ConvertRGBAInt32CompToFloat(r);
       mG = ConvertRGBAInt32CompToFloat(g);
@@ -190,7 +190,7 @@ public:
          RGBAFloatComp b,
          RGBAFloatComp a,
          unsigned int i) {
-      Data[i].Set(r, g, b, a); 
+      Data[i].Set(r, g, b, a);
    }
    void Set(
          RGBAInt32Comp r,
@@ -198,7 +198,7 @@ public:
          RGBAInt32Comp b,
          RGBAInt32Comp a,
          unsigned int i) {
-      Data[i].Set(r, g, b, a); 
+      Data[i].Set(r, g, b, a);
    }
    void Set(RGBAInt32 rgba, int i) {
       Data[i].Set(rgba);
@@ -244,7 +244,7 @@ public:
       return Name;
    }
    RGBAFloatImage* DownSample() const;
-   
+
    bool WriteToFile(const char* filename);
    static RGBAFloatImage* ReadFromFile(const char* filename);
 

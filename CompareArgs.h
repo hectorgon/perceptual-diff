@@ -25,21 +25,21 @@ class RGBAFloatImage;
 class CompareArgs
 {
 public:
-	CompareArgs();
-	~CompareArgs();
-	bool Parse_Args(int argc, char **argv);	
-	void Print_Args();
-	
-	RGBAFloatImage		*ImgA;				// Image A
-	RGBAFloatImage		*ImgB;				// Image B
-	RGBAFloatImage		*ImgDiff;			// Diff image
-	bool			Verbose;			// Print lots of text or not
-	bool			LuminanceOnly;		// Only consider luminance; ignore chroma channels in the comparison.
-	float			FieldOfView;		// Field of view in degrees
-	float			Gamma;				// The gamma to convert to linear color space
-	float			Luminance;			// the display's luminance
-	unsigned int	ThresholdPixels;	// How many pixels different to ignore
-	std::string		ErrorStr;			// Error string
+   CompareArgs();
+   ~CompareArgs();
+   bool Parse_Args(int argc, char **argv);
+   void Print_Args();
+
+   RGBAFloatImage    *ImgA;            // Image A
+   RGBAFloatImage    *ImgB;            // Image B
+   RGBAFloatImage    *ImgDiff;         // Diff image
+   bool              Verbose;          // Print lots of text or not
+   bool              LuminanceOnly;    // Only consider luminance; ignore chroma channels in the comparison.
+   float             FieldOfView;      // Field of view in degrees
+   float             Gamma;            // The gamma to convert to linear color space
+   float             Luminance;        // the display's luminance
+   unsigned int      ThresholdPixels;  // How many pixels different to ignore
+   std::string       ErrorStr;         // Error string
   // How much color to use in the metric.
   // 0.0 is the same as LuminanceOnly = true,
   // 1.0 means full strength.

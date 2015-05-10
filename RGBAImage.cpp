@@ -86,7 +86,7 @@ bool RGBAFloatImage::WriteToFile(const char* filename)
             GetRGBTriplet(scanlineTriplet[x], idx);
          }
       }
-	
+
       finalBitmap = bitmap;
    } else if (FreeImage_FIFSupportsExportType(fileType, FIT_BITMAP)) {
       FIBITMAP* bitmap = FreeImage_Allocate(Width, Height, 32);
@@ -102,7 +102,7 @@ bool RGBAFloatImage::WriteToFile(const char* filename)
          for (int x = 0; x < Width; x++, idx++)
             scanline[x] = GetInt32(idx);
       }
-   
+
       FreeImage_SetTransparent(bitmap, false);
       finalBitmap = FreeImage_ConvertTo24Bits(bitmap);
       FreeImage_Unload(bitmap);
@@ -111,7 +111,7 @@ bool RGBAFloatImage::WriteToFile(const char* filename)
    const bool result = !!FreeImage_Save(fileType, finalBitmap, filename);
    if(!result)
       printf("Failed to save to %s\n", filename);
-   
+
    FreeImage_Unload(finalBitmap);
    return result;
 }
@@ -124,7 +124,7 @@ RGBAFloatImage* RGBAFloatImage::ReadFromFile(const char* filename)
       printf("Unknown filetype %s\n", filename);
       return 0;
    }
-   
+
    int bpp = 0;
    FREE_IMAGE_TYPE origImageType = FIT_UNKNOWN;
 
@@ -156,7 +156,7 @@ RGBAFloatImage* RGBAFloatImage::ReadFromFile(const char* filename)
    int resIdx = 0;
    if ((origImageType == FIT_BITMAP) || (origImageType == FIT_RGB16) || (origImageType == FIT_RGBA16)) {
       for (int y = 0; y < h; y++) {
-         const RGBAInt32* scanline = 
+         const RGBAInt32* scanline =
             reinterpret_cast<const RGBAInt32*>(FreeImage_GetScanLine(freeImage, h - y - 1));
          for (int x = 0; x < w; x++, resIdx++)
             result->Set(scanline[x], resIdx);

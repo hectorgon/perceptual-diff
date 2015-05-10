@@ -27,22 +27,22 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 
 int main(int argc, char **argv)
 {
-	CompareArgs args;
-	
-	if (!args.Parse_Args(argc, argv)) {
-		printf("%s", args.ErrorStr.c_str());
-		return -1;
-	} else {
-		if (args.Verbose) args.Print_Args();
-	}
+   CompareArgs args;
 
-	const bool passed = Yee_Compare(args);
-	if (passed) {
-		if(args.Verbose)
-			printf("PASS: %s\n", args.ErrorStr.c_str());
-	} else {
-		printf("FAIL: %s\n", args.ErrorStr.c_str());
-	}
+   if (!args.Parse_Args(argc, argv)) {
+      printf("%s", args.ErrorStr.c_str());
+      return -1;
+   } else {
+      if (args.Verbose) args.Print_Args();
+   }
 
-	return passed ? 0 : 1;
+   const bool passed = Yee_Compare(args);
+   if (passed) {
+      if(args.Verbose)
+         printf("PASS: %s\n", args.ErrorStr.c_str());
+   } else {
+      printf("FAIL: %s\n", args.ErrorStr.c_str());
+   }
+
+   return passed ? 0 : 1;
 }
