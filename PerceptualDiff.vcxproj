@@ -77,7 +77,6 @@
       <Command>mkdir Bin\$(Platform)
 copy "$(OutDir)$(TargetName).exe" Bin\$(Platform)
 copy FreeImage\$(Platform)\FreeImaged.dll Bin\$(Platform)
-copy FreeImage\$(Platform)\FreeImaged.pdb Bin\$(Platform)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
