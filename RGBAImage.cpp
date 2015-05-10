@@ -19,7 +19,7 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 #include "RGBAImage.h"
 #include <cstdio>
 #include <cstring>
-#include <cstdint> // for int32_t, uint32_t, etc.
+#include <cstdint> // uint8_t, uint32_t, etc.
 
 RGBAFloatImage* RGBAFloatImage::DownSample() const {
    if (Width <=1 || Height <=1)
@@ -32,13 +32,15 @@ RGBAFloatImage* RGBAFloatImage::DownSample() const {
    for (int y = 0; y < nh; y++) {
       for (int x = 0; x < nw; x++) {
          RGBAFloat d[4];
+
          // Sample a 2x2 patch from the parent image.
          d[0] = Get(2 * x + 0, 2 * y + 0);
          d[1] = Get(2 * x + 1, 2 * y + 0);
          d[2] = Get(2 * x + 0, 2 * y + 1);
          d[3] = Get(2 * x + 1, 2 * y + 1);
-         RGBAFloat avgColor(0);
+
          // Compute average color.
+         RGBAFloat avgColor(0);
          for (int i = 0; i < 4; i++) {
             RGBAFloatComp c;
             c  = d[0].GetComp(i);
@@ -78,7 +80,6 @@ bool RGBAFloatImage::WriteToFile(const char* filename)
 	   for( int y=0; y < Height; y++, source += Width )
 	   {
          RGBAInt32* scanline = (RGBAInt32*)FreeImage_GetScanLine(bitmap, Height - y - 1);
-		   //memcpy(scanline, source, sizeof(source[0]) * Width);
          for (int x = 0; x < Width; x++, idx++)
             scanline[x] = GetInt32(idx);
       }

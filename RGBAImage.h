@@ -20,17 +20,27 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 #include "FreeImage.h"
 
 #include <string>
-#include <cstdint> // for int32_t, uint32_t, etc.
+#include <cstdint> // uint8_t, uint32_t, etc.
+#include <algorithm>
+#include <cassert>
 
-/** Basic pixel values types.
- */
-typedef uint8_t RGBAFloatComp;
-typedef uint8_t RGBAInt32Comp;
-inline RGBAInt32Comp ConvertRGBAFloatCompToInt32(RGBAFloatComp f) {
-   return f;
+template <typename T>
+inline T Clamp(const T& n, const T& lower, const T& upper)
+{
+   assert(lower <= upper);
+   return std::max(lower, std::min(n, upper));
 }
+
+/** Basic pixel values types. */
+typedef float   RGBAFloatComp;
+typedef uint8_t RGBAInt32Comp;
+
+inline RGBAInt32Comp ConvertRGBAFloatCompToInt32(RGBAFloatComp f) {
+   return std::lround(Clamp(f, 0.0f, 1.0f) * 255.0f);
+}
+
 inline RGBAFloatComp ConvertRGBAInt32CompToFloat(RGBAInt32Comp i) {
-   return i;
+   return i / 255.0f;
 }
 
 /** Type for an integer R,G,B,A pixel.
@@ -51,13 +61,13 @@ class RGBAFloat
 {
 public:
    RGBAFloat() {};
-   RGBAFloat(const RGBAFloatComp &v) :
+   RGBAFloat(RGBAFloatComp v) :
       mR(v), mG(v), mB(v), mA(v) {}
    RGBAFloat(
-         const RGBAFloatComp &r, 
-         const RGBAFloatComp &g, 
-         const RGBAFloatComp &b, 
-         const RGBAFloatComp &a) :
+         RGBAFloatComp r, 
+         RGBAFloatComp g, 
+         RGBAFloatComp b, 
+         RGBAFloatComp a) :
       mR(r), mG(g), mB(b), mA(a) {}
 
    const RGBAFloatComp& GetComp(unsigned int i) const {
@@ -66,12 +76,6 @@ public:
    RGBAFloatComp& GetComp(unsigned int i) {
       return reinterpret_cast<RGBAFloatComp*>(this)[i];
    }
-   //RGBAInt32Comp GetCompInt(unsigned int i) {
-   //   return ConvertRGBAFloatCompToInt32(GetComp(i));
-   //}
-   //RGBAInt32Comp GetCompFloat(unsigned int i) {
-   //   return ConvertRGBAFloatCompToInt32(GetComp(i));
-   //}
    RGBAInt32 GetInt32() {
       return
            (ConvertRGBAFloatCompToInt32(mR) & 0xFF) << FI_RGBA_RED_SHIFT
@@ -81,25 +85,25 @@ public:
    }
 
    void Set(
-         const RGBAFloatComp &r, 
-         const RGBAFloatComp &g, 
-         const RGBAFloatComp &b, 
-         const RGBAFloatComp &a) {
+         RGBAFloatComp r, 
+         RGBAFloatComp g, 
+         RGBAFloatComp b, 
+         RGBAFloatComp a) {
       mR = r;
       mG = g;
       mB = b;
       mA = a;
    }
-   //void Set(
-   //      const RGBAInt32Comp &r, 
-   //      const RGBAInt32Comp &g, 
-   //      const RGBAInt32Comp &b, 
-   //      const RGBAInt32Comp &a) {
-   //   mR = ConvertRGBAInt32CompToFloat(r);
-   //   mG = ConvertRGBAInt32CompToFloat(g);
-   //   mB = ConvertRGBAInt32CompToFloat(b);
-   //   mA = ConvertRGBAInt32CompToFloat(a);
-   //}
+   void Set(
+         RGBAInt32Comp r, 
+         RGBAInt32Comp g, 
+         RGBAInt32Comp b, 
+         RGBAInt32Comp a) {
+      mR = ConvertRGBAInt32CompToFloat(r);
+      mG = ConvertRGBAInt32CompToFloat(g);
+      mB = ConvertRGBAInt32CompToFloat(b);
+      mA = ConvertRGBAInt32CompToFloat(a);
+   }
    void Set(RGBAInt32 rgba) {
       mR = ConvertRGBAInt32CompToFloat((rgba >> FI_RGBA_RED_SHIFT)   & 0xFF);
       mG = ConvertRGBAInt32CompToFloat((rgba >> FI_RGBA_GREEN_SHIFT) & 0xFF);
@@ -161,24 +165,24 @@ public:
    }
 
    void Set(
-         const RGBAFloatComp &r,
-         const RGBAFloatComp &g,
-         const RGBAFloatComp &b,
-         const RGBAFloatComp &a,
+         RGBAFloatComp r,
+         RGBAFloatComp g,
+         RGBAFloatComp b,
+         RGBAFloatComp a,
          unsigned int i) {
       Data[i].Set(r, g, b, a); 
    }
-   void Set(RGBAFloat d, int x, int y) {
-      Data[x + y * Width] = d;
+   void Set(RGBAFloat rgba, int x, int y) {
+      Data[x + y * Width] = rgba;
    }
-   //void Set(
-   //      const RGBAInt32Comp &r,
-   //      const RGBAInt32Comp &g,
-   //      const RGBAInt32Comp &b,
-   //      const RGBAInt32Comp &a,
-   //      unsigned int i) {
-   //   Data[i].Set(r, g, b, a); 
-   //}
+   void Set(
+         RGBAInt32Comp r,
+         RGBAInt32Comp g,
+         RGBAInt32Comp b,
+         RGBAInt32Comp a,
+         unsigned int i) {
+      Data[i].Set(r, g, b, a); 
+   }
    void Set(RGBAInt32 rgba, int i) {
       Data[i].Set(rgba);
    }

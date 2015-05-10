@@ -141,7 +141,7 @@ bool Yee_Compare(CompareArgs &args)
 		}
 	}
 	if (identical) {
-		args.ErrorStr = "Images are binary identical\n";
+		args.ErrorStr = "Unclamped images are binary identical\n";
 		return true;
 	}
 	
@@ -170,15 +170,20 @@ bool Yee_Compare(CompareArgs &args)
 			float r, g, b, l;
 			i = x + y * w;
 
-			r = powf(args.ImgA->Get_Red(i)   / 255.0f, args.Gamma);
-			g = powf(args.ImgA->Get_Green(i) / 255.0f, args.Gamma);
-			b = powf(args.ImgA->Get_Blue(i)  / 255.0f, args.Gamma);						
-			AdobeRGBToXYZ(r,g,b,aX[i],aY[i],aZ[i]);			
+         // TODO: It might make sense to use values which are clamped to a displayable range 
+         // (0.0-1.0) is some scenarios, but for now we ignore the fact that pixels above 1.0
+         // do not perceptually differ from those with value 1.0 and do the copmutations 
+         // as if they were distinguishable.
+
+			r = powf(args.ImgA->Get_Red(i)  , args.Gamma);
+			g = powf(args.ImgA->Get_Green(i), args.Gamma);
+			b = powf(args.ImgA->Get_Blue(i) , args.Gamma);
+			AdobeRGBToXYZ(r,g,b,aX[i],aY[i],aZ[i]);
 			XYZToLAB(aX[i], aY[i], aZ[i], l, aA[i], aB[i]);
 			
-         r = powf(args.ImgB->Get_Red(i)   / 255.0f, args.Gamma);
-			g = powf(args.ImgB->Get_Green(i) / 255.0f, args.Gamma);
-			b = powf(args.ImgB->Get_Blue(i)  / 255.0f, args.Gamma);						
+         r = powf(args.ImgB->Get_Red(i)  , args.Gamma);
+			g = powf(args.ImgB->Get_Green(i), args.Gamma);
+			b = powf(args.ImgB->Get_Blue(i) , args.Gamma);
 			AdobeRGBToXYZ(r,g,b,bX[i],bY[i],bZ[i]);
 			XYZToLAB(bX[i], bY[i], bZ[i], l, bA[i], bB[i]);
 			
@@ -269,11 +274,11 @@ bool Yee_Compare(CompareArgs &args)
 		if (!pass) {
 			pixels_failed++;
 			if (args.ImgDiff) {
-				args.ImgDiff->Set(255, 0, 0, 255, index);
+				args.ImgDiff->Set(1.f, 0.f, 0.f, 1.f, index);
 			}
 		} else {
 			if (args.ImgDiff) {
-				args.ImgDiff->Set(0, 0, 0, 255, index);
+				args.ImgDiff->Set(0.f, 0.f, 0.f, 1.f, index);
 			}
 		}
 	  }
@@ -301,11 +306,11 @@ bool Yee_Compare(CompareArgs &args)
 	if (args.ImgDiff) {
 		if (args.ImgDiff->WriteToFile(args.ImgDiff->Get_Name().c_str())) {
 			args.ErrorStr += "Wrote difference image to ";
-			args.ErrorStr+= args.ImgDiff->Get_Name();
+			args.ErrorStr += args.ImgDiff->Get_Name();
 			args.ErrorStr += "\n";
 		} else {
 			args.ErrorStr += "Could not write difference image to ";
-			args.ErrorStr+= args.ImgDiff->Get_Name();
+			args.ErrorStr += args.ImgDiff->Get_Name();
 			args.ErrorStr += "\n";
 		}
 	}
