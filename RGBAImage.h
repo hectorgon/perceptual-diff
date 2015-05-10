@@ -17,6 +17,8 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 #ifndef _RGAIMAGE_H
 #define _RGBAIMAGE_H
 
+#include "FreeImage.h"
+
 #include <string>
 #include <cstdint> // for int32_t, uint32_t, etc.
 
@@ -31,6 +33,10 @@ inline RGBAFloatComp ConvertRGBAInt32CompToFloat(RGBAInt32Comp i) {
    return i;
 }
 
+/** Type for an integer R,G,B,A pixel.
+ *
+ * The order of components is defined in the FreeImage library through macros like FI_RGBA_*_SHIFT.
+ */
 typedef uint32_t RGBAInt32;
 
 /** Class encapsulating a float R,G,B,A pixel.
@@ -68,10 +74,10 @@ public:
    //}
    RGBAInt32 GetInt32() {
       return
-             ConvertRGBAFloatCompToInt32(mR) & 0xFF
-         || (ConvertRGBAFloatCompToInt32(mG) & 0xFF) << 8
-         || (ConvertRGBAFloatCompToInt32(mB) & 0xFF) << 16
-         || (ConvertRGBAFloatCompToInt32(mA) & 0xFF) << 24;
+           (ConvertRGBAFloatCompToInt32(mR) & 0xFF) << FI_RGBA_RED_SHIFT
+         | (ConvertRGBAFloatCompToInt32(mG) & 0xFF) << FI_RGBA_GREEN_SHIFT
+         | (ConvertRGBAFloatCompToInt32(mB) & 0xFF) << FI_RGBA_BLUE_SHIFT
+         | (ConvertRGBAFloatCompToInt32(mA) & 0xFF) << FI_RGBA_ALPHA_SHIFT;
    }
 
    void Set(
@@ -95,10 +101,10 @@ public:
    //   mA = ConvertRGBAInt32CompToFloat(a);
    //}
    void Set(RGBAInt32 rgba) {
-      mR = ConvertRGBAInt32CompToFloat(rgba         & 0xFF);
-      mG = ConvertRGBAInt32CompToFloat((rgba >> 8)  & 0xFF);
-      mB = ConvertRGBAInt32CompToFloat((rgba >> 16) & 0xFF);
-      mA = ConvertRGBAInt32CompToFloat((rgba >> 24) & 0xFF);
+      mR = ConvertRGBAInt32CompToFloat((rgba >> FI_RGBA_RED_SHIFT)   & 0xFF);
+      mG = ConvertRGBAInt32CompToFloat((rgba >> FI_RGBA_GREEN_SHIFT) & 0xFF);
+      mB = ConvertRGBAInt32CompToFloat((rgba >> FI_RGBA_BLUE_SHIFT)  & 0xFF);
+      mA = ConvertRGBAInt32CompToFloat((rgba >> FI_RGBA_ALPHA_SHIFT) & 0xFF);
    }
 
    RGBAFloat& operator+=(const RGBAFloat& a) {

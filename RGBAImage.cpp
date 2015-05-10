@@ -17,7 +17,6 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 */
 
 #include "RGBAImage.h"
-#include "FreeImage.h"
 #include <cstdio>
 #include <cstring>
 #include <cstdint> // for int32_t, uint32_t, etc.
@@ -65,7 +64,7 @@ bool RGBAFloatImage::WriteToFile(const char* filename)
 		return false;
 	}
 
-	FIBITMAP* bitmap = FreeImage_Allocate(Width, Height, 32, 0x000000ff, 0x0000ff00, 0x00ff0000);
+	FIBITMAP* bitmap = FreeImage_Allocate(Width, Height, 32);
 	if(!bitmap)
 	{
 		printf("Failed to create freeimage for %s\n", filename);
