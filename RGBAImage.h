@@ -83,7 +83,30 @@ public:
          | (ConvertRGBAFloatCompToInt32(mB) & 0xFF) << FI_RGBA_BLUE_SHIFT
          | (ConvertRGBAFloatCompToInt32(mA) & 0xFF) << FI_RGBA_ALPHA_SHIFT;
    }
+   void GetRGBTriplet(RGBAFloatComp(&rgb)[3]) {
+      rgb[0] = mR;
+      rgb[1] = mG;
+      rgb[2] = mB;
+   }
+   void GetRGBQuad(RGBAFloatComp(&rgb)[4]) {
+      rgb[0] = mR;
+      rgb[1] = mG;
+      rgb[2] = mB;
+      rgb[3] = mA;
+   }
 
+   void Set(const RGBAFloatComp (&rgb)[3]) {
+      mR = rgb[0];
+      mG = rgb[1];
+      mB = rgb[2];
+      mA = 1.0f;
+   }
+   void Set(const RGBAFloatComp (&rgba)[4]) {
+      mR = rgba[0];
+      mG = rgba[1];
+      mB = rgba[2];
+      mA = rgba[3];
+   }
    void Set(
          RGBAFloatComp r, 
          RGBAFloatComp g, 
@@ -151,19 +174,15 @@ public:
    };
    ~RGBAFloatImage() { if (Data) delete[] Data; }
 
-   RGBAFloatComp Get_Red(unsigned int i)   {
-      return Data[i].mR;
+   void Set(RGBAFloat rgba, int x, int y) {
+      Data[x + y * Width] = rgba;
    }
-   RGBAFloatComp Get_Green(unsigned int i) {
-      return Data[i].mG;
+   void Set(const RGBAFloatComp (&rgb)[3], unsigned int i) {
+      Data[i].Set(rgb);
    }
-   RGBAFloatComp Get_Blue(unsigned int i)  {
-      return Data[i].mB;
+   void Set(const RGBAFloatComp (&rgba)[4], unsigned int i) {
+      Data[i].Set(rgba);
    }
-   RGBAFloatComp Get_Alpha(unsigned int i) {
-      return Data[i].mA;
-   }
-
    void Set(
          RGBAFloatComp r,
          RGBAFloatComp g,
@@ -171,9 +190,6 @@ public:
          RGBAFloatComp a,
          unsigned int i) {
       Data[i].Set(r, g, b, a); 
-   }
-   void Set(RGBAFloat rgba, int x, int y) {
-      Data[x + y * Width] = rgba;
    }
    void Set(
          RGBAInt32Comp r,
@@ -195,6 +211,25 @@ public:
    }
    uint32_t GetInt32(int i) {
       return Data[i].GetInt32();
+   }
+   void GetRGBTriplet(RGBAFloatComp(&rgb)[3], unsigned int i) {
+      Data[i].GetRGBTriplet(rgb);
+   }
+   void GetRGBQuad(RGBAFloatComp(&rgb)[4], unsigned int i) {
+      Data[i].GetRGBQuad(rgb);
+   }
+
+   RGBAFloatComp Get_Red(unsigned int i) {
+      return Data[i].mR;
+   }
+   RGBAFloatComp Get_Green(unsigned int i) {
+      return Data[i].mG;
+   }
+   RGBAFloatComp Get_Blue(unsigned int i) {
+      return Data[i].mB;
+   }
+   RGBAFloatComp Get_Alpha(unsigned int i) {
+      return Data[i].mA;
    }
 
    int Get_Width(void) const {

@@ -156,6 +156,8 @@ void CompareArgs::Print_Args()
 	printf("Threshold pixels is %d pixels\n", ThresholdPixels);
 	printf("The Gamma is %f\n", Gamma);
 	printf("The Display's luminance is %f candela per meter squared\n", Luminance);
-   printf("Image 1 is \"%s\"\n", ImgA->Get_Name().c_str());
-   printf("Image 2 is \"%s\"\n", ImgB->Get_Name().c_str());
+   printf("Image 1 is    \"%s\"\n", ImgA->Get_Name().c_str());
+   printf("Image 2 is    \"%s\"\n", ImgB->Get_Name().c_str());
+   if (ImgDiff != NULL)
+      printf("Diff image is \"%s\"\n", ImgDiff->Get_Name().c_str());
 }

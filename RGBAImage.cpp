@@ -66,39 +66,53 @@ bool RGBAFloatImage::WriteToFile(const char* filename)
 		return false;
 	}
 
-	FIBITMAP* bitmap = FreeImage_Allocate(Width, Height, 32);
-	if(!bitmap)
-	{
-		printf("Failed to create freeimage for %s\n", filename);
-		return false;
-	}
+   FIBITMAP* finalBitmap = NULL;
 
-	const RGBAFloat* source = Data;
-   //if (32bit uint image)
-   //{
+   if (FreeImage_FIFSupportsExportType(fileType, FIT_RGBF)) {
+      FIBITMAP* bitmap = FreeImage_AllocateT(FIT_RGBF, Width, Height);
+	   if(!bitmap) {
+		   printf("Failed to create FreeImage bitmap for %s\n", filename);
+		   return false;
+	   }
+
+	   const RGBAFloat* source = Data;
       int idx = 0;
-	   for( int y=0; y < Height; y++, source += Width )
-	   {
+	   for( int y=0; y < Height; y++, source += Width ) {
+         RGBAFloatComp(*scanlineTriplet)[3] =
+            reinterpret_cast<RGBAFloatComp(*)[3]>(
+               reinterpret_cast<void*>(
+                  FreeImage_GetScanLine(bitmap, Height - y - 1)));
+         for (int x = 0; x < Width; x++, idx++) {
+            GetRGBTriplet(scanlineTriplet[x], idx);
+         }
+      }
+	
+      finalBitmap = bitmap;
+   } else if (FreeImage_FIFSupportsExportType(fileType, FIT_BITMAP)) {
+      FIBITMAP* bitmap = FreeImage_Allocate(Width, Height, 32);
+	   if(!bitmap) {
+		   printf("Failed to create FreeImage bitmap for %s\n", filename);
+		   return false;
+	   }
+
+	   const RGBAFloat* source = Data;
+      int idx = 0;
+	   for( int y=0; y < Height; y++, source += Width ) {
          RGBAInt32* scanline = (RGBAInt32*)FreeImage_GetScanLine(bitmap, Height - y - 1);
          for (int x = 0; x < Width; x++, idx++)
             scanline[x] = GetInt32(idx);
       }
-   //}
-   // else if (float image)
-   //{
-   //  float save...
-   //}
 	
-	FreeImage_SetTransparent(bitmap, false);
-	FIBITMAP* converted = FreeImage_ConvertTo24Bits(bitmap);
-	
-	
-	const bool result = !!FreeImage_Save(fileType, converted, filename);
+	   FreeImage_SetTransparent(bitmap, false);
+	   finalBitmap = FreeImage_ConvertTo24Bits(bitmap);
+      FreeImage_Unload(bitmap);
+   }
+
+	const bool result = !!FreeImage_Save(fileType, finalBitmap, filename);
 	if(!result)
 		printf("Failed to save to %s\n", filename);
 	
-	FreeImage_Unload(converted);
-	FreeImage_Unload(bitmap);
+	FreeImage_Unload(finalBitmap);
 	return result;
 }
 
@@ -111,11 +125,22 @@ RGBAFloatImage* RGBAFloatImage::ReadFromFile(const char* filename)
 		return 0;
 	}
 	
-	FIBITMAP* freeImage = 0;
+   int bpp = 0;
+   FREE_IMAGE_TYPE origImageType = FIT_UNKNOWN;
+
+   FIBITMAP* freeImage = 0;
 	if(FIBITMAP* temporary = FreeImage_Load(fileType, filename, 0))
 	{
-		freeImage = FreeImage_ConvertTo32Bits(temporary);
-		FreeImage_Unload(temporary);
+      bpp = FreeImage_GetBPP(temporary);
+      origImageType = FreeImage_GetImageType(temporary);
+
+      if ((origImageType == FIT_BITMAP) || (origImageType == FIT_RGB16) || (origImageType == FIT_RGBA16)) {
+         freeImage = FreeImage_ConvertTo32Bits(temporary);
+         FreeImage_Unload(temporary);
+      } else if ((origImageType == FIT_RGBF) || (origImageType == FIT_RGBAF)) {
+         // Float
+         freeImage = temporary;
+      }
 	}
 	if(!freeImage)
 	{
@@ -127,21 +152,36 @@ RGBAFloatImage* RGBAFloatImage::ReadFromFile(const char* filename)
 	const int h = FreeImage_GetHeight(freeImage);
 
 	RGBAFloatImage* result = new RGBAFloatImage(w, h, filename);
-	// Copy the image over to our internal format, FreeImage has the scanlines bottom to top though.
-   //if (32bit uint image)
-   //{
-      int resIdx = 0;
-	   for( int y=0; y < h; y++ )
-	   {
-         const RGBAInt32* scanline = (const RGBAInt32*)FreeImage_GetScanLine(freeImage, h - y - 1);
+	// Copy the image over to our internal format, FreeImage has scanlines bottom to top though.
+   int resIdx = 0;
+   if ((origImageType == FIT_BITMAP) || (origImageType == FIT_RGB16) || (origImageType == FIT_RGBA16)) {
+      for (int y = 0; y < h; y++) {
+         const RGBAInt32* scanline = 
+            reinterpret_cast<const RGBAInt32*>(FreeImage_GetScanLine(freeImage, h - y - 1));
          for (int x = 0; x < w; x++, resIdx++)
             result->Set(scanline[x], resIdx);
       }
-   //}
-   // else if (float image)
-   //{
-   //  float load...
-   //}
+   } else if (origImageType == FIT_RGBF) {
+      for (int y = 0; y < h; y++) {
+         const RGBAFloatComp(*scanlineTriplet)[3] =
+            reinterpret_cast<const RGBAFloatComp(*)[3]>(
+               reinterpret_cast<const void*>(
+                  FreeImage_GetScanLine(freeImage, h - y - 1)));
+         for (int x = 0; x < w; x++, resIdx++) {
+            result->Set(scanlineTriplet[x], resIdx);
+         }
+      }
+   } else if (origImageType == FIT_RGBAF) {
+      for (int y = 0; y < h; y++) {
+         const RGBAFloatComp(*scanlineQuad)[4] =
+            reinterpret_cast<const RGBAFloatComp(*)[4]>(
+               reinterpret_cast<const void*>(
+                  FreeImage_GetScanLine(freeImage, h - y - 1)));
+         for (int x = 0; x < w; x++, resIdx++) {
+            result->Set(scanlineQuad[x], resIdx);
+         }
+      }
+   }
 
 	FreeImage_Unload(freeImage);
 	return result;

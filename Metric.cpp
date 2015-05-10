@@ -177,13 +177,13 @@ bool Yee_Compare(CompareArgs &args)
 
 			r = powf(args.ImgA->Get_Red(i)  , args.Gamma);
 			g = powf(args.ImgA->Get_Green(i), args.Gamma);
-			b = powf(args.ImgA->Get_Blue(i) , args.Gamma);
-			AdobeRGBToXYZ(r,g,b,aX[i],aY[i],aZ[i]);
+			b = powf(args.ImgA->Get_Blue(i) , args.Gamma);						
+			AdobeRGBToXYZ(r,g,b,aX[i],aY[i],aZ[i]);			
 			XYZToLAB(aX[i], aY[i], aZ[i], l, aA[i], aB[i]);
 			
          r = powf(args.ImgB->Get_Red(i)  , args.Gamma);
 			g = powf(args.ImgB->Get_Green(i), args.Gamma);
-			b = powf(args.ImgB->Get_Blue(i) , args.Gamma);
+			b = powf(args.ImgB->Get_Blue(i) , args.Gamma);						
 			AdobeRGBToXYZ(r,g,b,bX[i],bY[i],bZ[i]);
 			XYZToLAB(bX[i], bY[i], bZ[i], l, bA[i], bB[i]);
 			
