@@ -57,8 +57,7 @@ RGBAFloatImage* RGBAFloatImage::DownSample() const {
    return img;
 }
 
-bool RGBAFloatImage::WriteToFile(const char* filename)
-{
+bool RGBAFloatImage::WriteToFile(const char* filename) {
    const FREE_IMAGE_FORMAT fileType = FreeImage_GetFIFFromFilename(filename);
    if(FIF_UNKNOWN == fileType)
    {
@@ -116,11 +115,25 @@ bool RGBAFloatImage::WriteToFile(const char* filename)
    return result;
 }
 
-RGBAFloatImage* RGBAFloatImage::ReadFromFile(const char* filename)
-{
+bool RGBAFloatImage::CanOpenFile(const char *filename) {
+
+   FILE *handle = fopen(filename, "rb");
+
+   if (handle != NULL) {
+      fclose(handle);
+      return true;
+   } else
+      return false;
+}
+
+RGBAFloatImage* RGBAFloatImage::ReadFromFile(const char* filename) {
+   if (!CanOpenFile(filename)) {
+      printf("Cannot open %s\n", filename);
+      return 0;
+   }
+
    const FREE_IMAGE_FORMAT fileType = FreeImage_GetFileType(filename);
-   if(FIF_UNKNOWN == fileType)
-   {
+   if(FIF_UNKNOWN == fileType) {
       printf("Unknown filetype %s\n", filename);
       return 0;
    }

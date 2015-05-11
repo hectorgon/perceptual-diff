@@ -69,6 +69,11 @@ public:
          RGBAFloatComp b,
          RGBAFloatComp a) :
       mR(r), mG(g), mB(b), mA(a) {}
+   RGBAFloat(
+         RGBAFloatComp r,
+         RGBAFloatComp g,
+         RGBAFloatComp b) :
+      mR(r), mG(g), mB(b), mA(1.0) {}
 
    void Set(const RGBAFloatComp (&rgb)[3]) {
       mR = rgb[0];
@@ -144,7 +149,7 @@ public:
    }
 
    bool operator==(const RGBAFloat& a) {
-      return mR == a.mR && mG == a.mG && mR == a.mR && mA == a.mA;
+      return mR == a.mR && mG == a.mG && mB == a.mB && mA == a.mA;
    }
    bool operator!=(const RGBAFloat& a) {
       return !operator==(a);
@@ -247,6 +252,9 @@ public:
 
    bool WriteToFile(const char* filename);
    static RGBAFloatImage* ReadFromFile(const char* filename);
+
+protected:
+   static bool CanOpenFile(const char *filename);
 
 protected:
    int Width;
