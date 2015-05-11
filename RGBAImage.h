@@ -144,7 +144,7 @@ public:
    }
 
    bool operator==(const RGBAFloat& a) {
-      return mR == a.mR && mG == a.mG && mR == a.mR && mA == a.mA;
+      return mR == a.mR && mG == a.mG && mB == a.mB && mA == a.mA;
    }
    bool operator!=(const RGBAFloat& a) {
       return !operator==(a);

@@ -128,7 +128,7 @@ bool CompareArgs::Parse_Args(int argc, char **argv)
       } else if (image_count < 2) {
          RGBAFloatImage* img = RGBAFloatImage::ReadFromFile(argv[i]);
          if (!img) {
-            ErrorStr = "FAIL: Cannot open ";
+            ErrorStr = "FAIL: Cannot read ";
             ErrorStr += argv[i];
             ErrorStr += "\n";
             return false;
