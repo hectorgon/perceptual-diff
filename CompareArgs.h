@@ -21,6 +21,16 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 
 class RGBAFloatImage;
 
+enum ComparisonType
+{
+   // The orginal perceptual comparison mode
+   perceptualDifference,
+
+   // Root mean square error analysis: the first image is the reference image (the expected value), 
+   // the second image is the image to have the RMSE computed for (the estimator).
+   rmseAnalysis
+};
+
 // Args to pass into the comparison function
 class CompareArgs
 {
@@ -29,6 +39,8 @@ public:
    ~CompareArgs();
    bool Parse_Args(int argc, char **argv);
    void Print_Args();
+
+   ComparisonType    ComparisonMode;   // The main switch between various comparison modes
 
    RGBAFloatImage    *ImgA;            // Image A
    RGBAFloatImage    *ImgB;            // Image B

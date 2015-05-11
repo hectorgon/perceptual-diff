@@ -23,5 +23,7 @@ class CompareArgs;
 // References: A Perceptual Metric for Production Testing, Hector Yee, Journal of Graphics Tools 2004
 bool Yee_Compare(CompareArgs &args);
 
+bool RMSEAnalysis(CompareArgs &args);
+
 #endif
 

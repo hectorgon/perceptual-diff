@@ -36,12 +36,19 @@ int main(int argc, char **argv)
       if (args.Verbose) args.Print_Args();
    }
 
-   const bool passed = Yee_Compare(args);
-   if (passed) {
-      if(args.Verbose)
-         printf("PASS: %s\n", args.ErrorStr.c_str());
-   } else {
-      printf("FAIL: %s\n", args.ErrorStr.c_str());
+   bool passed = false;
+   if (args.ComparisonMode == perceptualDifference) {
+      passed = Yee_Compare(args);
+      if (passed) {
+         if(args.Verbose)
+            printf("PASS: %s\n", args.ErrorStr.c_str());
+      } else {
+         printf("FAIL: %s\n", args.ErrorStr.c_str());
+      }
+   } else if (args.ComparisonMode == rmseAnalysis) {
+      passed = RMSEAnalysis(args);
+      if (!passed)
+         printf("FAIL: %s\n", args.ErrorStr.c_str());
    }
 
    return passed ? 0 : 1;

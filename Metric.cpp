@@ -326,3 +326,68 @@ bool Yee_Compare(CompareArgs &args)
 
    return false;
 }
+
+bool RMSEAnalysis(CompareArgs &args)
+{
+   if ((args.ImgA->Get_Width() != args.ImgB->Get_Width()) ||
+      (args.ImgA->Get_Height() != args.ImgB->Get_Height())) {
+      args.ErrorStr = "Image dimensions do not match\n";
+      return false;
+   }
+   
+   unsigned int i, dim;
+   dim = args.ImgA->Get_Width() * args.ImgA->Get_Height();
+   bool identical = true;
+   for (i = 0; i < dim; i++) {
+      if (args.ImgA->Get(i) != args.ImgB->Get(i)) {
+        identical = false;
+        break;
+      }
+   }
+   if (identical) {
+      args.ErrorStr = "Unclamped images are binary identical\n";
+      return true;
+   }
+
+   // Square erros sums
+   long double seSumRed   = 0.0;
+   long double seSumGreen = 0.0;
+   long double seSumBlue  = 0.0;
+
+   unsigned int w, h;
+   w = args.ImgA->Get_Width();
+   h = args.ImgA->Get_Height();
+   for (unsigned int y = 0; y < h; y++) {
+      for (unsigned int x = 0; x < w; x++) {
+         i = x + y * w;
+
+         // TODO: What about gamma correction?
+
+         const float errorRed = args.ImgA->Get_Red(i) - args.ImgB->Get_Red(i);
+         const float seRed = errorRed * errorRed;
+         seSumRed += seRed;
+
+         const float errorGreen = args.ImgA->Get_Green(i) - args.ImgB->Get_Green(i);
+         const float seGreen = errorGreen * errorGreen;
+         seSumGreen += seGreen;
+
+         const float errorBlue = args.ImgA->Get_Blue(i) - args.ImgB->Get_Blue(i);
+         const float seBlue = errorBlue * errorBlue;
+         seSumBlue += seBlue;
+      }
+   }
+
+   const long double mseRed   = seSumRed   / dim;
+   const long double mseGreen = seSumGreen / dim;
+   const long double mseBlue  = seSumBlue  / dim;
+
+   const long double rmseRed   = sqrtl(mseRed);
+   const long double rmseGreen = sqrtl(mseGreen);
+   const long double rmseBlue  = sqrtl(mseBlue);
+
+   printf("RMSE of red   channel: %.6f\n", rmseRed);
+   printf("RMSE of green channel: %.6f\n", rmseGreen);
+   printf("RMSE of blue  channel: %.6f\n", rmseBlue);
+
+   return true;
+}

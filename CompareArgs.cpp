@@ -31,6 +31,7 @@ static const char *usage =
 "PeceptualDiff image1.tif image2.tif\n\n\
    Compares image1.tif and image2.tif using a perceptually based image metric\n\
    Options:\n\
+\t-mode perceptual|rmse : Switch between comparison modes: the original perceptual (default) or RMSE analysis\n\
 \t-verbose       : Turns on verbose mode\n\
 \t-fov deg       : Field of view in degrees (0.1 to 89.9)\n\
 \t-threshold p   : #pixels p below which differences are ignored\n\
@@ -47,6 +48,8 @@ static const char *usage =
 
 CompareArgs::CompareArgs()
 {
+   ComparisonMode = perceptualDifference;
+
    ImgA = NULL;
    ImgB = NULL;
    ImgDiff = NULL;
@@ -77,7 +80,20 @@ bool CompareArgs::Parse_Args(int argc, char **argv)
    int image_count = 0;
    const char* output_file_name = NULL;
    for (int i = 1; i < argc; i++) {
-      if (strcmp(argv[i], "-fov") == 0) {
+      if (strcmp(argv[i], "-mode") == 0) {
+         if (++i < argc) {
+            if (strcmp(argv[i], "perceptual") == 0) {
+               ComparisonMode = perceptualDifference;
+            } else if (strcmp(argv[i], "rmse") == 0) {
+               ComparisonMode = rmseAnalysis;
+            } else {
+               ErrorStr = "FAIL: Unknown mode option ";
+               ErrorStr += argv[i];
+               ErrorStr += "\n";
+               return false;
+            }
+         }
+      } else if (strcmp(argv[i], "-fov") == 0) {
          if (++i < argc) {
             FieldOfView = (float) atof(argv[i]);
          }
