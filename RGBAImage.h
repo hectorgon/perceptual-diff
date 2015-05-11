@@ -69,6 +69,11 @@ public:
          RGBAFloatComp b,
          RGBAFloatComp a) :
       mR(r), mG(g), mB(b), mA(a) {}
+   RGBAFloat(
+         RGBAFloatComp r,
+         RGBAFloatComp g,
+         RGBAFloatComp b) :
+      mR(r), mG(g), mB(b), mA(1.0) {}
 
    void Set(const RGBAFloatComp (&rgb)[3]) {
       mR = rgb[0];
@@ -150,7 +155,114 @@ public:
       return !operator==(a);
    }
 
-   RGBAFloatComp mR, mG, mB, mA;
+   friend RGBAFloat operator+(const RGBAFloat& a, const RGBAFloat& b) {
+      return RGBAFloat(a.mR + b.mR, a.mG + b.mG, a.mB + b.mB, a.mA + b.mA);
+   }
+   friend RGBAFloat operator-(const RGBAFloat& a, const RGBAFloat& b) {
+      return RGBAFloat(a.mR - b.mR, a.mG - b.mG, a.mB - b.mB, a.mA - b.mA);
+   }
+   friend RGBAFloat operator*(const RGBAFloat& a, const RGBAFloat& b) {
+      return RGBAFloat(a.mR * b.mR, a.mG * b.mG, a.mB * b.mB, a.mA * b.mA);
+   }
+   friend RGBAFloat operator/(const RGBAFloat& a, const RGBAFloat& b) {
+      return RGBAFloat(a.mR / b.mR, a.mG / b.mG, a.mB / b.mB, a.mA / b.mA);
+   }
+
+   RGBAFloat Pow(float exp) const {
+      return RGBAFloat(
+         powf(mR, exp),
+         powf(mG, exp),
+         powf(mB, exp),
+         powf(mA, exp)
+         );
+   }
+
+   // Conversion from XYZ color space to L*a*b*
+   RGBAFloat sRGBToLxaxbx(const float gamma = 2.2) const {
+      // Assuming that input color is in sRGB color space, but not necessarily gamma corrected
+      // (e.g. from HDR format)
+
+      // Color must be linear with respect to energy - we need to remove gamma correction.
+      // sRGB actually uses slightly different formula, but for our purposes simple power function 
+      // should fork fine.
+      const RGBAFloat sRGBLinear = Pow(gamma);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // sRGB -> XYZ
+      /////////////////////////////////////////////////////////////////////////////////////////////
+
+      // The matrix gracefuly taken from 
+      // http://www.brucelindbloom.com/index.html?Eqn_RGB_to_XYZ.html
+      // (X)   [0.4124564  0.3575761  0.1804375]   (R_lin)
+      // (Y) = [0.2126729  0.7151522  0.0721750] . (G_lin)
+      // (Z)   [0.0193339  0.1191920  0.9503041]   (B_lin)
+      const RGBAFloat cXYZ(
+         0.4124564 * sRGBLinear.mR + 0.3575761 * sRGBLinear.mG + 0.1804375 * sRGBLinear.mB,
+         0.2126729 * sRGBLinear.mR + 0.7151522 * sRGBLinear.mG + 0.0721750 * sRGBLinear.mB,
+         0.0193339 * sRGBLinear.mR + 0.1191920 * sRGBLinear.mG + 0.9503041 * sRGBLinear.mB,
+         sRGBLinear.mA
+         );
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // XYZ -> L*a*b*
+      /////////////////////////////////////////////////////////////////////////////////////////////
+
+      // We use D65 with luminance 100 as the reference white, since images are mostly viewed 
+      // on sRGB devices (with D65 white point). The luminance 100 was chosen somehow arbitrarily.
+      const RGBAFloat refWhiteXYZ(95.05f, 100.00f, 108.90f);
+
+      // Formulae gracefuly taken from
+      // http://www.brucelindbloom.com/index.html?Eqn_XYZ_to_Lab.html
+      const RGBAFloatComp epsilon = 0.008856f;
+      const RGBAFloatComp kappa   = 903.3f;
+      const RGBAFloat cXYZNorm(
+         cXYZ / refWhiteXYZ);
+      const RGBAFloat f(
+         (cXYZNorm.mX > epsilon) ? cbrt(cXYZNorm.mX) : ((kappa * cXYZNorm.mX + 16.f) / 116.f),
+         (cXYZNorm.mY > epsilon) ? cbrt(cXYZNorm.mY) : ((kappa * cXYZNorm.mY + 16.f) / 116.f),
+         (cXYZNorm.mZ > epsilon) ? cbrt(cXYZNorm.mZ) : ((kappa * cXYZNorm.mZ + 16.f) / 116.f));
+      const RGBAFloat cLxaxbx(
+         116.f * f.mY - 16.f,
+         500.f * (f.mX - f.mY),
+         200.f * (f.mY - f.mZ));
+
+      return cLxaxbx;
+   }
+
+   static RGBAFloatComp DeltaE(const RGBAFloat& c1sRGB, const RGBAFloat& c2sRGB, const float gamma = 2.2) {
+      // We use the first, CIE76 version, which is just an Euclidian metric 
+      // in the L*a*b* color space
+
+      RGBAFloat c1Lxaxbx = c1sRGB.sRGBToLxaxbx(gamma);
+      RGBAFloat c2Lxaxbx = c2sRGB.sRGBToLxaxbx(gamma);
+
+      RGBAFloat diffLxaxbx = c1Lxaxbx - c2Lxaxbx;
+
+      return sqrt(
+           diffLxaxbx.mLx * diffLxaxbx.mLx
+         + diffLxaxbx.mAx * diffLxaxbx.mAx
+         + diffLxaxbx.mBx * diffLxaxbx.mBx
+         );
+   }
+
+   // XYZ and L*a*b* components added as syntactic sugar for more convenient work
+   //RGBAFloatComp mR, mG, mB, mA;
+   union {
+      RGBAFloatComp mR;
+      RGBAFloatComp mX;
+      RGBAFloatComp mLx;
+   };
+   union {
+      RGBAFloatComp mG;
+      RGBAFloatComp mY;
+      RGBAFloatComp mAx;
+   };
+   union {
+      RGBAFloatComp mB;
+      RGBAFloatComp mZ;
+      RGBAFloatComp mBx;
+   };
+   RGBAFloatComp mA;
 };
 
 /** Class encapsulating an image containing float-based R,G,B,A channels.
@@ -247,6 +359,9 @@ public:
 
    bool WriteToFile(const char* filename);
    static RGBAFloatImage* ReadFromFile(const char* filename);
+
+protected:
+   static bool CanOpenFile(const char *filename);
 
 protected:
    int Width;

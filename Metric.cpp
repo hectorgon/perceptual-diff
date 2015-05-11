@@ -374,6 +374,9 @@ bool RMSEAnalysis(CompareArgs &args)
          const float errorBlue = args.ImgA->Get_Blue(i) - args.ImgB->Get_Blue(i);
          const float seBlue = errorBlue * errorBlue;
          seSumBlue += seBlue;
+
+         // TODO: Perceptual color difference
+         float deltaE = RGBAFloat::DeltaE(args.ImgA->Get(i), args.ImgB->Get(i));
       }
    }
 
