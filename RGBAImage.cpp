@@ -117,7 +117,9 @@ bool RGBAFloatImage::WriteToFile(const char* filename) {
 
 bool RGBAFloatImage::CanOpenFile(const char *filename) {
 
-   FILE *handle = fopen(filename, "rb");
+   FILE *handle;
+   if (fopen_s(&handle, filename, "rb") != 0)
+      return false;
 
    if (handle != NULL) {
       fclose(handle);

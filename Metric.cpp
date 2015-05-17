@@ -294,13 +294,13 @@ bool Yee_Compare(CompareArgs &args)
    if (bLum) delete[] bLum;
    if (la) delete la;
    if (lb) delete lb;
-   if (aA) delete aA;
-   if (bA) delete bA;
-   if (aB) delete aB;
-   if (bB) delete bB;
+   if (aA) delete[] aA;
+   if (bA) delete[] bA;
+   if (aB) delete[] aB;
+   if (bB) delete[] bB;
 
    char different[100];
-   sprintf(different, "%d pixels are different\n", pixels_failed);
+   sprintf_s(different, "%d pixels are different\n", pixels_failed);
 
    // Always output image difference if requested.
    if (args.ImgDiff) {

@@ -37,7 +37,9 @@ typedef float   RGBAFloatComp;
 typedef uint8_t RGBAInt32Comp;
 
 inline RGBAInt32Comp ConvertRGBAFloatCompToInt32(RGBAFloatComp f) {
-   return std::lround(Clamp(f, 0.0f, 1.0f) * 255.0f);
+   return Clamp<RGBAInt32Comp>(
+      static_cast<RGBAInt32Comp>(std::lround(f * 255.0f)),
+      0, 255);
 }
 inline RGBAFloatComp ConvertRGBAInt32CompToFloat(RGBAInt32Comp i) {
    return i / 255.0f;
