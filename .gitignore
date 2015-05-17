@@ -12,4 +12,5 @@ Makefile
 /Debug/
 /Bin/
 /FreeImage/
-PerceptualDiff.v12.sln
+/PerceptualDiff.v12.sln
+/PerceptualDiff.vcxproj
