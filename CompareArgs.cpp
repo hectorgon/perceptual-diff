@@ -20,7 +20,7 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 #include <cstdlib>
 #include <cstring>
 
-static const char* copyright = 
+static const char* copyright =
 "PerceptualDiff version 1.1.1, Copyright (C) 2006 Yangli Hector Yee\n\
 PerceptualDiff comes with ABSOLUTELY NO WARRANTY;\n\
 This is free software, and you are welcome\n\
@@ -33,8 +33,8 @@ static const char *usage =
    Options:\n\
 \t-verbose       : Turns on verbose mode\n\
 \t-fov deg       : Field of view in degrees (0.1 to 89.9)\n\
-\t-threshold p	 : #pixels p below which differences are ignored\n\
-\t-gamma g       : Value to convert rgb into linear space (default 2.2)\n\
+\t-threshold p   : #pixels p below which differences are ignored\n\
+\t-gamma g       : Value to convert input rgb values into linear space (default 2.2)\n\
 \t-luminance l   : White luminance (default 100.0 cdm^-2)\n\
 \t-luminanceonly : Only consider luminance; ignore chroma (color) in the comparison\n\
 \t-colorfactor   : How much of color to use, 0.0 to 1.0, 0.0 = ignore color.\n\
@@ -47,93 +47,93 @@ static const char *usage =
 
 CompareArgs::CompareArgs()
 {
-	ImgA = NULL;
-	ImgB = NULL;
-	ImgDiff = NULL;
-	Verbose = false;
-	LuminanceOnly = false;
-	FieldOfView = 45.0f;
-	Gamma = 2.2f;
-	ThresholdPixels = 100;
-	Luminance = 100.0f;
+   ImgA = NULL;
+   ImgB = NULL;
+   ImgDiff = NULL;
+   Verbose = false;
+   LuminanceOnly = false;
+   FieldOfView = 45.0f;
+   Gamma = 2.2f;
+   ThresholdPixels = 100;
+   Luminance = 100.0f;
    ColorFactor = 1.0f;
    DownSample = 0;
 }
 
 CompareArgs::~CompareArgs()
 {
-	if (ImgA) delete ImgA;
-	if (ImgB) delete ImgB;
-	if (ImgDiff) delete ImgDiff;
+   if (ImgA) delete ImgA;
+   if (ImgB) delete ImgB;
+   if (ImgDiff) delete ImgDiff;
 }
 
 bool CompareArgs::Parse_Args(int argc, char **argv)
 {
-	if (argc < 3) {
-		ErrorStr = copyright;
-		ErrorStr += usage;
-		return false;
-	}
-	int image_count = 0;
-	const char* output_file_name = NULL;
-	for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-fov") == 0) {
-			if (++i < argc) {
-				FieldOfView = (float) atof(argv[i]);
-			}
-		} else if (strcmp(argv[i], "-verbose") == 0) {
-			Verbose = true;
-		} else if (strcmp(argv[i], "-threshold") == 0) {
-			if (++i < argc) {
-				ThresholdPixels = atoi(argv[i]);
-			}
-		} else if (strcmp(argv[i], "-gamma") == 0) {
-			if (++i < argc) {
-				Gamma = (float) atof(argv[i]);
-			}
-		} else if (strcmp(argv[i], "-luminance") == 0) {
-			if (++i < argc) {
-				Luminance = (float) atof(argv[i]);
-			}
-		} else if (strcmp(argv[i], "-luminanceonly") == 0) {
-			LuminanceOnly = true;
-		} else if (strcmp(argv[i], "-colorfactor") == 0) {
-			if (++i < argc) {
-				ColorFactor = (float) atof(argv[i]);
-			}
-		} else if (strcmp(argv[i], "-downsample") == 0) {
-			if (++i < argc) {
-				DownSample = (int) atoi(argv[i]);
-			}
-		} else if (strcmp(argv[i], "-output") == 0) {
-			if (++i < argc) {
-				output_file_name = argv[i];
-			}
-		} else if (image_count < 2) {
-			RGBAImage* img = RGBAImage::ReadFromFile(argv[i]);
-			if (!img) {
-				ErrorStr = "FAIL: Cannot open ";
-				ErrorStr += argv[i];
-				ErrorStr += "\n";
-				return false;
-			} else {
-				++image_count;
-				if(image_count == 1)
-					ImgA = img;
-				else
-					ImgB = img;
-			}
-		} else {
-			fprintf(stderr, "Warning: option/file \"%s\" ignored\n", argv[i]);
-		}
-	} // i
-	if(!ImgA || !ImgB) {
-		ErrorStr = "FAIL: Not enough image files specified\n";
-		return false;
-	}
+   if (argc < 3) {
+      ErrorStr = copyright;
+      ErrorStr += usage;
+      return false;
+   }
+   int image_count = 0;
+   const char* output_file_name = NULL;
+   for (int i = 1; i < argc; i++) {
+      if (strcmp(argv[i], "-fov") == 0) {
+         if (++i < argc) {
+            FieldOfView = (float) atof(argv[i]);
+         }
+      } else if (strcmp(argv[i], "-verbose") == 0) {
+         Verbose = true;
+      } else if (strcmp(argv[i], "-threshold") == 0) {
+         if (++i < argc) {
+            ThresholdPixels = atoi(argv[i]);
+         }
+      } else if (strcmp(argv[i], "-gamma") == 0) {
+         if (++i < argc) {
+            Gamma = (float) atof(argv[i]);
+         }
+      } else if (strcmp(argv[i], "-luminance") == 0) {
+         if (++i < argc) {
+            Luminance = (float) atof(argv[i]);
+         }
+      } else if (strcmp(argv[i], "-luminanceonly") == 0) {
+         LuminanceOnly = true;
+      } else if (strcmp(argv[i], "-colorfactor") == 0) {
+         if (++i < argc) {
+            ColorFactor = (float) atof(argv[i]);
+         }
+      } else if (strcmp(argv[i], "-downsample") == 0) {
+         if (++i < argc) {
+            DownSample = (int) atoi(argv[i]);
+         }
+      } else if (strcmp(argv[i], "-output") == 0) {
+         if (++i < argc) {
+            output_file_name = argv[i];
+         }
+      } else if (image_count < 2) {
+         RGBAFloatImage* img = RGBAFloatImage::ReadFromFile(argv[i]);
+         if (!img) {
+            ErrorStr = "FAIL: Cannot open ";
+            ErrorStr += argv[i];
+            ErrorStr += "\n";
+            return false;
+         } else {
+            ++image_count;
+            if(image_count == 1)
+               ImgA = img;
+            else
+               ImgB = img;
+         }
+      } else {
+         fprintf(stderr, "Warning: option/file \"%s\" ignored\n", argv[i]);
+      }
+   } // i
+   if(!ImgA || !ImgB) {
+      ErrorStr = "FAIL: Not enough image files specified\n";
+      return false;
+   }
    for (int i = 0; i < DownSample; i++) {
       if (Verbose) printf("Downsampling by %d\n", 1 << (i+1));
-      RGBAImage *tmp = ImgA->DownSample();
+      RGBAFloatImage *tmp = ImgA->DownSample();
       if (tmp) {
          delete ImgA;
          ImgA = tmp;
@@ -144,16 +144,20 @@ bool CompareArgs::Parse_Args(int argc, char **argv)
          ImgB = tmp;
       }
    }
-	if(output_file_name) {
-		ImgDiff = new RGBAImage(ImgA->Get_Width(), ImgA->Get_Height(), output_file_name);
-	}
-	return true;
+   if(output_file_name) {
+      ImgDiff = new RGBAFloatImage(ImgA->Get_Width(), ImgA->Get_Height(), output_file_name);
+   }
+   return true;
 }
 
 void CompareArgs::Print_Args()
 {
-	printf("Field of view is %f degrees\n", FieldOfView);
-	printf("Threshold pixels is %d pixels\n", ThresholdPixels);
-	printf("The Gamma is %f\n", Gamma);
-	printf("The Display's luminance is %f candela per meter squared\n", Luminance);
+   printf("Field of view is %f degrees\n", FieldOfView);
+   printf("Threshold pixels is %d pixels\n", ThresholdPixels);
+   printf("The Gamma is %f\n", Gamma);
+   printf("The Display's luminance is %f candela per meter squared\n", Luminance);
+   printf("Image 1 is    \"%s\"\n", ImgA->Get_Name().c_str());
+   printf("Image 2 is    \"%s\"\n", ImgB->Get_Name().c_str());
+   if (ImgDiff != NULL)
+      printf("Diff image is \"%s\"\n", ImgDiff->Get_Name().c_str());
 }
