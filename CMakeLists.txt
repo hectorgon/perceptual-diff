@@ -9,6 +9,8 @@ ADD_EXECUTABLE (perceptualdiff ${DIFF_SRC})
 
 INSTALL(TARGETS perceptualdiff DESTINATION bin)
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 # look for freeimage
 FIND_PATH(FREEIMAGE_INCLUDE_DIR FreeImage.h
   /usr/local/include

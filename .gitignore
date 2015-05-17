@@ -1,0 +1,16 @@
+perceptualdiff
+*.cmake
+CMakeCache.txt
+/CMakeFiles/
+Makefile
+*.log
+*.user
+*.sdf
+*.suo
+*.opensdf
+/Release/
+/Debug/
+/Bin/
+/FreeImage/
+/PerceptualDiff.v12.sln
+/PerceptualDiff.vcxproj
