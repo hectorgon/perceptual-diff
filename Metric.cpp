@@ -300,7 +300,7 @@ bool Yee_Compare(CompareArgs &args)
    if (bB) delete[] bB;
 
    char different[100];
-   sprintf_s(different, "%d pixels are different\n", pixels_failed);
+   sprintf(different, "%d pixels are different\n", pixels_failed);
 
    // Always output image difference if requested.
    if (args.ImgDiff) {
