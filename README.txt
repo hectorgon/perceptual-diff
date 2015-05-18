@@ -26,18 +26,18 @@ Project file)
 Usage
 
 perceptualdiff image1.(tif | png) image2.(tif | png) [options]
--verbose : Turns on verbose mode
--fov deg: field of view, deg, in degrees. Usually between 10.0 to 85.0. 
-This controls how much of the screen the oberserver is seeing. Front row of 
-a theatre has a field of view of around 25 degrees. Back row has a field of
+-verbose        : Turns on verbose mode
+-fov deg        : field of view, deg, in degrees. Usually between 10.0 to 85.0. 
+ This controls how much of the screen the oberserver is seeing. Front row of 
+ a theatre has a field of view of around 25 degrees. Back row has a field of
  view of around 60 degrees.
--threshold p : Sets the number of pixels, p, to reject. For example if p is
+-threshold p    : Sets the number of pixels, p, to reject. For example if p is
  100, then the test fails if 100 or more pixels are perceptably different.
--gamma g : The gamma to use to convert to RGB linear space. Default is 2.2
--luminance l: The luminance of the display the observer is seeing. Default
+-gamma g        : The gamma to use to convert to RGB linear space. Default is 2.2
+-luminance l    : The luminance of the display the observer is seeing. Default
  is 100 candela per meter squared
--colorfactor   : How much of color to use, 0.0 to 1.0, 0.0 = ignore color.
--downsample    : How many powers of two to down sample the image.
+-colorfactor    : How much of color to use, 0.0 to 1.0, 0.0 = ignore color.
+-downsample     : How many powers of two to down sample the image.
 -output foo.ppm : Saves the difference image to foo.ppm
 
 Credits
@@ -47,12 +47,15 @@ Scott Corley, for png file IO code
 Tobias Sauerwein, for make install, package_source Cmake configuration
 Cairo Team for bugfixes
 Jim Tilander, Rewrote the IO to use FreeImage.
+Ivo Pavlik for floating-point image formats support
 
 Version History
 
 1.0   - Initial distribution
 1.0.1 - Fixed off by one convolution error and libpng interface to 1.2.8
 1.0.2 - [jt] Converted the loading and saving routines to use FreeImage
-1.1 - Added colorfactor and downsample options. Also always output
-difference file if requested. Always print out differing pixels even if the test passes.
+1.1   - Added colorfactor and downsample options. Also always output
+        difference file if requested. Always print out differing pixels
+        even if the test passes.
 1.1.1 - Turn off color test in low lighting conditions.
+1.2.0 - Added support for floating-point image formats.
