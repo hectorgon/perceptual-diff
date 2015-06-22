@@ -42,12 +42,14 @@ perceptualdiff image1.(tif | png) image2.(tif | png) [options]
 
 Credits
 
-Hector Yee, project administrator and originator - hectorgon.blogspot.com
-Scott Corley, for png file IO code
-Tobias Sauerwein, for make install, package_source Cmake configuration
-Cairo Team for bugfixes
-Jim Tilander, Rewrote the IO to use FreeImage.
-Ivo Pavlik for floating-point image formats support
+Hector Yee: project administrator and originator - hectorgon.blogspot.com
+Scott Corley: png file IO code
+Tobias Sauerwein: make install, package_source Cmake configuration
+Jeff Breidenbach: Debian Packaging
+Cairo Team: bugfixes
+Chris Foster: administration and patching
+Jim Tilander: rewriting the IO to use FreeImage
+Ivo Pavlik: floating-point image formats support
 
 Version History
 
